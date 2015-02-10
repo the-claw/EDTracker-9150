@@ -33,6 +33,9 @@ const char  infoString []  = "EDTrackerMCal V1.0.1";
 #include "CalLib.h"
 #include <EEPROM.h>
 
+#define MPU_GND_PIN 4
+#define MPU_VCC_PIN 5
+
 enum outputModeType {
   OFF,
   DBG,
@@ -77,6 +80,14 @@ float filterp50hz (float *xv, float *yv)
 void setup()
 {
   Serial.begin(115200);
+  
+  pinMode(MPU_GND_PIN, OUTPUT);
+  pinMode(MPU_VCC_PIN, OUTPUT);
+
+  digitalWrite(MPU_GND_PIN, LOW);  
+  digitalWrite(MPU_VCC_PIN, HIGH);
+  delay(50);
+  
   Wire.begin();
   delay(1000);
 

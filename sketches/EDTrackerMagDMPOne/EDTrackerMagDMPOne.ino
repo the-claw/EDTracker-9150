@@ -51,6 +51,8 @@ extern "C" {
 #include <inv_mpu_dmp_motion_driver.h>
 }
 
+#define MPU_GND_PIN 4
+#define MPU_VCC_PIN 5
 
 float xDriftComp = 0.0;
 
@@ -187,7 +189,13 @@ long avgGyro[3] ;//= {0, 0, 0};
 void setup() {
 
   Serial.begin(115200);
+  pinMode(MPU_GND_PIN, OUTPUT);
+  pinMode(MPU_VCC_PIN, OUTPUT);
 
+  digitalWrite(MPU_GND_PIN, LOW);  
+  digitalWrite(MPU_VCC_PIN, HIGH);
+  delay(50);
+  
   pinMode(BUTTON_PIN, INPUT_PULLUP);
   pinMode(LED_PIN, OUTPUT);
 
@@ -251,7 +259,7 @@ int  startupSamples;
 
 void loop()
 {
-  unsigned char sensor_data;
+  unsigned long sensor_timestamp;
 
   nowMillis = millis();
 
@@ -262,13 +270,13 @@ void loop()
     unsigned char more ;
     unsigned char magSampled ;
     long quat[4];
-    sensor_data = 1;
-    dmp_read_fifo(gyro, accel, quat, &sensor_data, &sensors, &more);
+    sensor_timestamp = 1;
+    dmp_read_fifo(gyro, accel, quat, &sensor_timestamp, &sensors, &more);
 
     if (!more)
       new_gyro = false;
 
-    if (sensor_data == 0)
+    if (sensor_timestamp == 0)
     {
       Quaternion q( (float)quat[0]  / 1073741824.0f,
                     (float)quat[1]  / 1073741824.0f,
@@ -684,7 +692,7 @@ void parseInput()
 //  new_gyro = 1;
 //}
 
-ISR(INT6_vect) {
+ISR(INT3_vect) {
   new_gyro = 1;
 }
 
@@ -731,8 +739,8 @@ void disable_mpu() {
 }
 
 void enable_mpu() {
-  EICRB |= (1 << ISC60) | (1 << ISC61); // sets the interrupt type for EICRB (INT6)
-  EIMSK |= (1 << INT6); // activates the interrupt. 6 for 6, etc
+  EICRA |= (1 << ISC30) | (1 << ISC31); // sets the interrupt type for EICRA (INT3)
+  EIMSK |= (1 << INT3); // activates the interrupt. 6 for 6, etc
   mpu_set_dmp_state(1);  // This enables the DMP; at this point, interrupts should commence
   dmp_on = true;
 }
