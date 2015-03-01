@@ -102,6 +102,7 @@ float magXform[12];
 #define SCL_PIN 3
 
 #define LED_PIN 17 // (Arduino is 13, Teensy is 11, Teensy++ is 6)
+#define BUTTON_GND_PIN 14
 #define BUTTON_PIN 10
 
 #ifndef cbi
@@ -195,8 +196,10 @@ void setup() {
   digitalWrite(MPU_GND_PIN, LOW);  
   digitalWrite(MPU_VCC_PIN, HIGH);
   delay(50);
-  
+
   pinMode(BUTTON_PIN, INPUT_PULLUP);
+  pinMode(BUTTON_GND_PIN, OUTPUT);
+  digitalWrite(BUTTON_GND_PIN, LOW);
   pinMode(LED_PIN, OUTPUT);
 
   // send a I2C stop signal
